@@ -1,0 +1,324 @@
+.clients-container {
+  min-height: 100vh;
+  padding: 30px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.clients-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  background: white;
+  padding: 20px 30px;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.clients-header h1 {
+  color: #667eea;
+  font-size: 2em;
+}
+
+.back-button {
+  background: #95a5a6;
+  color: white;
+  padding: 8px 15px;
+  border-radius: 8px;
+  margin-right: 15px;
+  font-weight: bold;
+}
+
+.back-button:hover {
+  background: #7f8c8d;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.add-button, .logout-button {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+
+.add-button {
+  background: #27ae60;
+  color: white;
+}
+
+.add-button:hover {
+  background: #229954;
+}
+
+.logout-button {
+  background: #e74c3c;
+  color: white;
+}
+
+.logout-button:hover {
+  background: #c0392b;
+}
+
+.clients-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.client-card {
+  background: white;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+
+.client-card:hover {
+  transform: translateY(-3px);
+}
+
+.client-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.client-header h3 {
+  color: #333;
+  font-size: 1.3em;
+}
+
+.credit-badge {
+  background: #f39c12;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 0.8em;
+  font-weight: bold;
+}
+
+.client-info {
+  margin-bottom: 15px;
+}
+
+.client-info p {
+  margin: 8px 0;
+  color: #555;
+}
+
+.client-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.view-button, .edit-button, .delete-button {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 0.9em;
+}
+
+.view-button {
+  background: #3498db;
+  color: white;
+}
+
+.view-button:hover {
+  background: #2980b9;
+}
+
+.edit-button {
+  background: #3498db;
+  color: white;
+}
+
+.edit-button:hover {
+  background: #2980b9;
+}
+
+.delete-button {
+  background: #e74c3c;
+  color: white;
+}
+
+.delete-button:hover {
+  background: #c0392b;
+}
+
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 60px;
+  background: white;
+  border-radius: 15px;
+  color: #999;
+  font-size: 1.2em;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-content h2 {
+  color: #667eea;
+  margin-bottom: 20px;
+}
+
+.details-modal {
+  max-width: 800px;
+}
+
+.details-content {
+  margin-bottom: 20px;
+}
+
+.detail-section {
+  margin-bottom: 25px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 10px;
+}
+
+.detail-section h3 {
+  color: #667eea;
+  margin-bottom: 15px;
+}
+
+.detail-section p {
+  margin: 8px 0;
+  color: #555;
+}
+
+.credit-amount {
+  color: #e74c3c;
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+.ventes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.vente-item {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  border-left: 4px solid #667eea;
+}
+
+.vente-item p {
+  margin: 5px 0;
+}
+
+.no-data {
+  color: #999;
+  font-style: italic;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #333;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 1em;
+}
+
+.form-group input:focus {
+  border-color: #667eea;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.cancel-button, .submit-button, .close-button {
+  flex: 1;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 1em;
+}
+
+.cancel-button, .close-button {
+  background: #95a5a6;
+  color: white;
+}
+
+.cancel-button:hover, .close-button:hover {
+  background: #7f8c8d;
+}
+
+.submit-button {
+  background: #27ae60;
+  color: white;
+}
+
+.submit-button:hover {
+  background: #229954;
+}
+
+@media (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .clients-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .client-actions {
+    flex-direction: column;
+  }
+}
+

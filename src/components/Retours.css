@@ -1,0 +1,209 @@
+.retours-container {
+  min-height: 100vh;
+  padding: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.retours-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  background: white;
+  padding: 20px 30px;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.retours-header h1 {
+  color: #667eea;
+  font-size: 2em;
+}
+
+.back-button {
+  background: #95a5a6;
+  color: white;
+  padding: 8px 15px;
+  border-radius: 8px;
+  margin-right: 15px;
+  font-weight: bold;
+}
+
+.back-button:hover {
+  background: #7f8c8d;
+}
+
+.logout-button {
+  background: #e74c3c;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
+.logout-button:hover {
+  background: #c0392b;
+}
+
+.retours-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.section-card {
+  background: white;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.section-card h2 {
+  color: #667eea;
+  margin-bottom: 20px;
+  font-size: 1.3em;
+}
+
+.client-select, .product-select {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 1em;
+  margin-bottom: 15px;
+}
+
+.client-select:focus, .product-select:focus {
+  border-color: #667eea;
+}
+
+.client-info-card, .product-info-card {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 15px;
+}
+
+.client-info-card p, .product-info-card p {
+  margin: 5px 0;
+  color: #555;
+}
+
+.ventes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.vente-card {
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.vente-card:hover {
+  border-color: #667eea;
+  background: #f8f9fa;
+}
+
+.vente-card.selected {
+  border-color: #667eea;
+  background: #e8f0fe;
+}
+
+.vente-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.vente-card-header strong {
+  color: #333;
+  font-size: 1.1em;
+}
+
+.vente-card-header span {
+  color: #666;
+  font-size: 0.9em;
+}
+
+.vente-card-info {
+  display: flex;
+  gap: 20px;
+}
+
+.vente-card-info p {
+  margin: 0;
+  color: #555;
+}
+
+.no-data {
+  text-align: center;
+  color: #999;
+  padding: 40px;
+  font-size: 1.1em;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #333;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 1em;
+}
+
+.form-group input:focus {
+  border-color: #667eea;
+}
+
+.retour-summary {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.retour-summary p {
+  margin: 10px 0;
+  font-size: 1.1em;
+}
+
+.submit-retour-button {
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-size: 1.2em;
+  font-weight: bold;
+  border-radius: 10px;
+  transition: transform 0.2s;
+}
+
+.submit-retour-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.submit-retour-button:disabled {
+  background: #95a5a6;
+  cursor: not-allowed;
+  transform: none;
+}
+
