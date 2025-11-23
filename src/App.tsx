@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { auth, api } from './utils/api';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import Products from './components/Products';
@@ -13,19 +14,37 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const auth = localStorage.getItem('app_gestion_authenticated');
-    setIsAuthenticated(auth === 'true');
-    setIsLoading(false);
+    // Vérifier si l'utilisateur a un token valide
+    const token = auth.getToken();
+    if (token) {
+      // Vérifier que le token est toujours valide
+      api.getMe()
+        .then(() => {
+          setIsAuthenticated(true);
+        })
+        .catch((err) => {
+          console.error('Erreur de vérification du token:', err);
+          // Token invalide, déconnecter
+          auth.removeToken();
+          auth.removeUser();
+          setIsAuthenticated(false);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    } else {
+      setIsAuthenticated(false);
+      setIsLoading(false);
+    }
   }, []);
 
   const handleLogin = () => {
     setIsAuthenticated(true);
-    localStorage.setItem('app_gestion_authenticated', 'true');
   };
 
   const handleLogout = () => {
+    api.logout();
     setIsAuthenticated(false);
-    localStorage.removeItem('app_gestion_authenticated');
   };
 
   if (isLoading) {

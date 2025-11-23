@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Vente, Retour, Client } from '../types';
-import { storage } from '../utils/storage';
+import { api } from '../utils/api';
 import './Historique.css';
 
 interface HistoriqueProps {
@@ -20,10 +20,19 @@ const Historique = ({ onLogout }: HistoriqueProps) => {
     loadData();
   }, []);
 
-  const loadData = () => {
-    setVentes(storage.getVentes());
-    setRetours(storage.getRetours());
-    setClients(storage.getClients());
+  const loadData = async () => {
+    try {
+      const [ventesData, retoursData, clientsData] = await Promise.all([
+        api.getVentes(),
+        api.getRetours(),
+        api.getClients(),
+      ]);
+      setVentes(ventesData);
+      setRetours(retoursData);
+      setClients(clientsData);
+    } catch (err: any) {
+      alert(err.message || 'Erreur lors du chargement des données');
+    }
   };
 
   const clientsAvecCredit = clients.filter(c => c.credit > 0);

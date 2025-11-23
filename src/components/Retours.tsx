@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Client, Product, Vente, Retour } from '../types';
-import { storage } from '../utils/storage';
+import { Client, Product, Vente } from '../types';
+import { api } from '../utils/api';
 import './Retours.css';
 
 interface RetoursProps {
@@ -33,13 +33,22 @@ const Retours = ({ onLogout }: RetoursProps) => {
     }
   }, [selectedClient, ventes]);
 
-  const loadData = () => {
-    setClients(storage.getClients());
-    setProducts(storage.getProducts());
-    setVentes(storage.getVentes());
+  const loadData = async () => {
+    try {
+      const [clientsData, productsData, ventesData] = await Promise.all([
+        api.getClients(),
+        api.getProducts(),
+        api.getVentes(),
+      ]);
+      setClients(clientsData);
+      setProducts(productsData);
+      setVentes(ventesData);
+    } catch (err: any) {
+      alert(err.message || 'Erreur lors du chargement des données');
+    }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!selectedClient) {
       alert('Veuillez sélectionner un client');
       return;
@@ -71,49 +80,26 @@ const Retours = ({ onLogout }: RetoursProps) => {
     const product = products.find(p => p.id === selectedProduct);
     if (!product) return;
 
-    // Créer le retour
-    const retour: Retour = {
-      id: Date.now().toString(),
-      clientId: selectedClient.id,
-      clientName: `${selectedClient.prenom} ${selectedClient.nom}`,
-      venteId: selectedVente.id,
-      productId: selectedProduct,
-      productName: product.name,
-      quantity: qty,
-      date: new Date().toISOString(),
-    };
+    try {
+      // Créer le retour via l'API (le backend gère automatiquement le stock)
+      await api.createRetour({
+        clientId: selectedClient.id,
+        venteId: selectedVente.id,
+        productId: selectedProduct,
+        productName: product.name,
+        quantity: qty,
+      });
 
-    const retours = storage.getRetours();
-    retours.push(retour);
-    storage.saveRetours(retours);
-
-    // Ajuster le stock
-    const updatedProducts = products.map(p => {
-      if (p.id === selectedProduct) {
-        return { ...p, stock: p.stock + qty };
-      }
-      return p;
-    });
-    storage.saveProducts(updatedProducts);
-
-    // Ajuster le crédit du client
-    const montantRetour = venteItem.price * qty;
-    const updatedClients = clients.map(c => {
-      if (c.id === selectedClient.id) {
-        const newCredit = Math.max(0, c.credit - montantRetour);
-        return { ...c, credit: newCredit };
-      }
-      return c;
-    });
-    storage.saveClients(updatedClients);
-
-    // Réinitialiser
-    setSelectedClient(null);
-    setSelectedVente(null);
-    setSelectedProduct('');
-    setQuantity('');
-    loadData();
-    alert('Retour enregistré avec succès !');
+      // Réinitialiser
+      setSelectedClient(null);
+      setSelectedVente(null);
+      setSelectedProduct('');
+      setQuantity('');
+      await loadData();
+      alert('Retour enregistré avec succès !');
+    } catch (err: any) {
+      alert(err.message || 'Erreur lors de l\'enregistrement du retour');
+    }
   };
 
   const availableProducts = selectedVente

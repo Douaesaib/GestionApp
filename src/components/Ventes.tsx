@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Product, Client, Vente, VenteItem, ModeVente } from '../types';
-import { storage } from '../utils/storage';
+import { api } from '../utils/api';
 import './Ventes.css';
 
 interface VentesProps {
@@ -16,14 +16,30 @@ const Ventes = ({ onLogout }: VentesProps) => {
   const [modeVente, setModeVente] = useState<ModeVente>('detail');
   const [venteItems, setVenteItems] = useState<VenteItem[]>([]);
   const [montantPaye, setMontantPaye] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     loadData();
   }, []);
 
-  const loadData = () => {
-    setClients(storage.getClients());
-    setProducts(storage.getProducts());
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const [clientsData, productsData] = await Promise.all([
+        api.getClients(),
+        api.getProducts(),
+      ]);
+      setClients(clientsData);
+      setProducts(productsData);
+    } catch (err: any) {
+      const errorMsg = err.message || 'Erreur lors du chargement des données';
+      setError(errorMsg);
+      alert(errorMsg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const addProductToVente = (product: Product) => {
@@ -67,7 +83,7 @@ const Ventes = ({ onLogout }: VentesProps) => {
   const montantPayeNum = parseFloat(montantPaye) || 0;
   const credit = Math.max(0, total - montantPayeNum);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!selectedClient) {
       alert('Veuillez sélectionner un client');
       return;
@@ -77,61 +93,37 @@ const Ventes = ({ onLogout }: VentesProps) => {
       return;
     }
 
-    // Vérifier le stock
-    for (const item of venteItems) {
-      const product = products.find(p => p.id === item.productId);
-      if (!product || product.stock < item.quantity) {
-        alert(`Stock insuffisant pour ${item.productName}`);
-        return;
-      }
+    try {
+      setLoading(true);
+      setError('');
+
+      // Créer la vente via l'API (le backend gère automatiquement le stock et le crédit)
+      const vente = await api.createVente({
+        clientId: selectedClient.id,
+        items: venteItems,
+        total,
+        montantPaye: montantPayeNum,
+        credit,
+      });
+
+      // Imprimer la facture
+      printFacture({
+        ...vente,
+        clientName: `${selectedClient.prenom} ${selectedClient.nom}`,
+      });
+
+      // Réinitialiser
+      setSelectedClient(null);
+      setVenteItems([]);
+      setMontantPaye('');
+      await loadData();
+      alert('Vente enregistrée avec succès !');
+    } catch (err: any) {
+      setError(err.message || 'Erreur lors de l\'enregistrement de la vente');
+      alert(err.message || 'Erreur lors de l\'enregistrement de la vente');
+    } finally {
+      setLoading(false);
     }
-
-    // Créer la vente
-    const vente: Vente = {
-      id: Date.now().toString(),
-      clientId: selectedClient.id,
-      clientName: `${selectedClient.prenom} ${selectedClient.nom}`,
-      items: venteItems,
-      total,
-      montantPaye: montantPayeNum,
-      credit,
-      date: new Date().toISOString(),
-      printed: false,
-    };
-
-    // Mettre à jour le stock
-    const updatedProducts = products.map(product => {
-      const item = venteItems.find(i => i.productId === product.id);
-      if (item) {
-        return { ...product, stock: product.stock - item.quantity };
-      }
-      return product;
-    });
-    storage.saveProducts(updatedProducts);
-
-    // Mettre à jour le crédit du client
-    const updatedClients = clients.map(client => {
-      if (client.id === selectedClient.id) {
-        return { ...client, credit: client.credit + credit };
-      }
-      return client;
-    });
-    storage.saveClients(updatedClients);
-
-    // Sauvegarder la vente
-    const ventes = storage.getVentes();
-    ventes.push(vente);
-    storage.saveVentes(ventes);
-
-    // Imprimer la facture
-    printFacture(vente);
-
-    // Réinitialiser
-    setSelectedClient(null);
-    setVenteItems([]);
-    setMontantPaye('');
-    loadData();
-    alert('Vente enregistrée avec succès !');
   };
 
   const printFacture = (vente: Vente) => {
@@ -214,6 +206,14 @@ const Ventes = ({ onLogout }: VentesProps) => {
           Déconnexion
         </button>
       </div>
+
+      {error && (
+        <div style={{ padding: '10px', margin: '10px', background: '#fee', color: '#c33', borderRadius: '5px' }}>
+          {error}
+        </div>
+      )}
+
+      {loading && <div style={{ padding: '20px', textAlign: 'center' }}>Chargement...</div>}
 
       <div className="ventes-content">
         <div className="ventes-left">

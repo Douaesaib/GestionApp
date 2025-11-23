@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Product, ModeVente } from '../types';
-import { storage } from '../utils/storage';
+import { api } from '../utils/api';
 import './Products.css';
 
 interface ProductsProps {
@@ -15,6 +15,8 @@ const Products = ({ onLogout }: ProductsProps) => {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [modeVente, setModeVente] = useState<ModeVente>('detail');
   const [showStockCritique, setShowStockCritique] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   
   const [formData, setFormData] = useState({
     name: '',
@@ -28,34 +30,46 @@ const Products = ({ onLogout }: ProductsProps) => {
     loadProducts();
   }, []);
 
-  const loadProducts = () => {
-    const allProducts = storage.getProducts();
-    setProducts(allProducts);
+  const loadProducts = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const allProducts = await api.getProducts();
+      setProducts(allProducts);
+    } catch (err: any) {
+      setError(err.message || 'Erreur lors du chargement des produits');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newProduct: Product = {
-      id: editingProduct?.id || Date.now().toString(),
-      name: formData.name,
-      priceGros: parseFloat(formData.priceGros) || 0,
-      priceDetail: parseFloat(formData.priceDetail) || 0,
-      stock: parseInt(formData.stock) || 0,
-      stockCritique: parseInt(formData.stockCritique) || 0,
-      createdAt: editingProduct?.createdAt || new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+    try {
+      setLoading(true);
+      setError('');
+      
+      const productData = {
+        name: formData.name,
+        priceGros: parseFloat(formData.priceGros) || 0,
+        priceDetail: parseFloat(formData.priceDetail) || 0,
+        stock: parseInt(formData.stock) || 0,
+        stockCritique: parseInt(formData.stockCritique) || 0,
+      };
 
-    const allProducts = storage.getProducts();
-    if (editingProduct) {
-      const index = allProducts.findIndex(p => p.id === editingProduct.id);
-      allProducts[index] = newProduct;
-    } else {
-      allProducts.push(newProduct);
+      if (editingProduct) {
+        await api.updateProduct(editingProduct.id, productData);
+      } else {
+        await api.createProduct(productData);
+      }
+      
+      await loadProducts();
+      resetForm();
+    } catch (err: any) {
+      setError(err.message || 'Erreur lors de la sauvegarde');
+    } finally {
+      setLoading(false);
     }
-    storage.saveProducts(allProducts);
-    loadProducts();
-    resetForm();
   };
 
   const resetForm = () => {
@@ -82,12 +96,18 @@ const Products = ({ onLogout }: ProductsProps) => {
     setShowModal(true);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
-      const allProducts = storage.getProducts();
-      const filtered = allProducts.filter(p => p.id !== id);
-      storage.saveProducts(filtered);
-      loadProducts();
+      try {
+        setLoading(true);
+        setError('');
+        await api.deleteProduct(id);
+        await loadProducts();
+      } catch (err: any) {
+        setError(err.message || 'Erreur lors de la suppression');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -123,6 +143,12 @@ const Products = ({ onLogout }: ProductsProps) => {
         </div>
       </div>
 
+      {error && (
+        <div style={{ padding: '10px', margin: '10px', background: '#fee', color: '#c33', borderRadius: '5px' }}>
+          {error}
+        </div>
+      )}
+
       <div className="mode-vente-selector">
         <label>Mode de vente:</label>
         <select value={modeVente} onChange={(e) => setModeVente(e.target.value as ModeVente)}>
@@ -130,6 +156,8 @@ const Products = ({ onLogout }: ProductsProps) => {
           <option value="gros">Gros</option>
         </select>
       </div>
+
+      {loading && <div style={{ padding: '20px', textAlign: 'center' }}>Chargement...</div>}
 
       <div className="products-grid">
         {displayedProducts.length === 0 ? (

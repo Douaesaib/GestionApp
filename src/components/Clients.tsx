@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Client } from '../types';
-import { storage } from '../utils/storage';
+import { api } from '../utils/api';
 import './Clients.css';
 
 interface ClientsProps {
@@ -11,10 +11,13 @@ interface ClientsProps {
 const Clients = ({ onLogout }: ClientsProps) => {
   const navigate = useNavigate();
   const [clients, setClients] = useState<Client[]>([]);
+  const [ventes, setVentes] = useState<any[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [showDetails, setShowDetails] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   
   const [formData, setFormData] = useState({
     nom: '',
@@ -27,34 +30,50 @@ const Clients = ({ onLogout }: ClientsProps) => {
     loadClients();
   }, []);
 
-  const loadClients = () => {
-    const allClients = storage.getClients();
-    setClients(allClients);
+  const loadClients = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const [allClients, allVentes] = await Promise.all([
+        api.getClients(),
+        api.getVentes(),
+      ]);
+      setClients(allClients);
+      setVentes(allVentes);
+    } catch (err: any) {
+      setError(err.message || 'Erreur lors du chargement des clients');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newClient: Client = {
-      id: editingClient?.id || Date.now().toString(),
-      nom: formData.nom,
-      prenom: formData.prenom,
-      adresse: formData.adresse || undefined,
-      telephone: formData.telephone,
-      credit: editingClient?.credit || 0,
-      createdAt: editingClient?.createdAt || new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+    try {
+      setLoading(true);
+      setError('');
+      
+      const clientData = {
+        nom: formData.nom,
+        prenom: formData.prenom,
+        adresse: formData.adresse || undefined,
+        telephone: formData.telephone,
+        credit: editingClient?.credit || 0,
+      };
 
-    const allClients = storage.getClients();
-    if (editingClient) {
-      const index = allClients.findIndex(c => c.id === editingClient.id);
-      allClients[index] = newClient;
-    } else {
-      allClients.push(newClient);
+      if (editingClient) {
+        await api.updateClient(editingClient.id, clientData);
+      } else {
+        await api.createClient(clientData);
+      }
+      
+      await loadClients();
+      resetForm();
+    } catch (err: any) {
+      setError(err.message || 'Erreur lors de la sauvegarde');
+    } finally {
+      setLoading(false);
     }
-    storage.saveClients(allClients);
-    loadClients();
-    resetForm();
   };
 
   const resetForm = () => {
@@ -79,12 +98,18 @@ const Clients = ({ onLogout }: ClientsProps) => {
     setShowModal(true);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer ce client ?')) {
-      const allClients = storage.getClients();
-      const filtered = allClients.filter(c => c.id !== id);
-      storage.saveClients(filtered);
-      loadClients();
+      try {
+        setLoading(true);
+        setError('');
+        await api.deleteClient(id);
+        await loadClients();
+      } catch (err: any) {
+        setError(err.message || 'Erreur lors de la suppression');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -94,7 +119,6 @@ const Clients = ({ onLogout }: ClientsProps) => {
   };
 
   const getClientVentes = (clientId: string) => {
-    const ventes = storage.getVentes();
     return ventes.filter(v => v.clientId === clientId);
   };
 
@@ -119,6 +143,14 @@ const Clients = ({ onLogout }: ClientsProps) => {
           </button>
         </div>
       </div>
+
+      {error && (
+        <div style={{ padding: '10px', margin: '10px', background: '#fee', color: '#c33', borderRadius: '5px' }}>
+          {error}
+        </div>
+      )}
+
+      {loading && <div style={{ padding: '20px', textAlign: 'center' }}>Chargement...</div>}
 
       <div className="clients-grid">
         {clients.length === 0 ? (

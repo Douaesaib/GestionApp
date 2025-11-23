@@ -64,6 +64,12 @@
   color: #e74c3c;
   margin-bottom: 15px;
   font-size: 0.9em;
+  background: #fee;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #e74c3c;
+  white-space: pre-line;
+  text-align: left;
 }
 
 .pin-info {
